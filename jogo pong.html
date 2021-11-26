@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+
+	<canvas id="paper" width="600" height="500"></canvas>
+
+	<script type="text/javascript">
+
+		//Load the first commands
+		window.onload = function(){
+			start();
+			setInterval(main, 1000 / 60);
+
+		}
+
+		//Start all the variables and the game area
+		function start(){
+
+			drawPaper = document.getElementById("paper");
+			areaDraw = drawPaper.getContext("2d");
+
+			//Variables 
+			widthField = 600;
+			heightField = 500;
+
+			middleLine = 5;
+
+			widthRacket = 10;
+			heightRacket = 100;
+
+			ballWH = 10;
+
+			effectRacket = 0.3;
+				
+			positionBallX = positionBallY = 200;
+			speedBallX = speedBallY = constantSpeedBall = 5;
+
+			positionPlayer1 = positionPlayer2 = 100;
+
+			scorePlayer1 = scorePlayer2 = 0;
+			speedPlayer2 = 5;
+
+			nowStage = 1;
+			pointsPerStage = 5;
+
+			//Mouse following
+			drawPaper.addEventListener('mousemove', function(e){
+
+				positionPlayer1 = e.clientY - heightRacket / 2;
+
+		});
+	 }
+
+	 //Draw all the elements of the game
+		function draw(){
+
+			//Field
+			areaDraw.fillStyle = "#800000";
+			areaDraw.fillRect(0, 0, widthField, heightField); 
+
+			//Middle Line
+			areaDraw.fillStyle = "#ffffff";
+			areaDraw.fillRect( (widthField - middleLine) / 2 , 0, middleLine, heightField);
+
+			//Rackets
+			areaDraw.fillRect(0, positionPlayer1, widthRacket, heightRacket);
+			areaDraw.fillRect(widthField - widthRacket , positionPlayer2, widthRacket, heightRacket);
+
+			//Score
+			areaDraw.fillText("Jogador 1: " + scorePlayer1 + " pontos", 100, 100);
+			areaDraw.fillText("Jogador 2: " + scorePlayer2 + " pontos", 400, 100);
+
+			//Ball
+			areaDraw.fillRect(positionBallX, positionBallY, ballWH, ballWH);
+
+		}
+
+		//Configs of the game and calculates all the speeds and positions
+		function calculate(){
+
+			positionBallX = positionBallX + speedBallX;
+			positionBallY = positionBallY + speedBallY;
+
+			//Upper side
+			if (positionBallY < 0 && speedBallY < 0) {
+
+				speedBallY = -speedBallY;
+
+			}//
+
+			//Lower Side
+			if (positionBallY > heightField && speedBallY > 0) {
+
+				speedBallY = -speedBallY;
+
+			}//
+
+			//Player 2 scored
+			if (positionBallX < 0) {
+
+				//If it's gonna hit the racket
+				if (positionBallY > positionPlayer1 && positionBallY < positionPlayer1 + heightRacket) {
+
+					speedBallX = -speedBallX;
+					var difY = positionBallY - (positionPlayer1 + heightRacket / 2);
+					speedBallY = difY * effectRacket;
+
+				}else{
+
+					scorePlayer2++;
+					restart();
+
+				}//
+			}//
+
+			//Player 1 scored
+			if (positionBallX > widthField) {
+
+				if (positionBallY > positionPlayer2 && positionBallY < positionPlayer2 + heightRacket) {
+
+					speedBallX = -speedBallX;
+					var difY = positionBallY - (positionPlayer2 + heightRacket / 2);
+					speedBallY = difY * effectRacket;
+
+				}else{
+
+					scorePlayer1++;
+
+					if ( (scorePlayer1 > 0) && (scorePlayer1 % pointsPerStage == 0 )) {
+
+					stages();
+						
+					}
+
+					restart();
+
+				}//
+			}//
+
+			//Player 2 (Machine)
+			if (positionPlayer2 + heightRacket / 2 < positionBallY ) {
+				
+				positionPlayer2 = positionPlayer2 + speedPlayer2;
+
+			}else{
+
+				positionPlayer2 = positionPlayer2 - speedPlayer2;
+
+			}
+
+		}//Calculate
+
+	 	//Reposite the ball in the middle of the field
+		function restart(){
+
+			positionBallX = widthField / 2;
+			positionBallY = heightField / 2;
+			speedBallX = -speedBallX;
+			speedBallY = constantSpeedBall;
+
+		}
+
+		function stages(){
+			nowStage++;
+			
+			constantSpeedBall *= 1.20;
+			speedPlayer2 *= 1.20;
+
+			console.log("Fase Atual: " + nowStage);
+			console.log("Velocidade da bola = " + constantSpeedBall);
+			console.log("Velocidade Jogador 2 = " + speedPlayer2);
+		}
+
+		//Start all the other functions
+		function main(){
+
+			draw();
+			calculate();
+
+		}
+
+	</script>
+
+</body>
+</html>
